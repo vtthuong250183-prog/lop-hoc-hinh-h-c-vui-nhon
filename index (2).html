@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp Học Hình Học Vui Nhộn Cùng Cô Huyền</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts - Fredoka & Quicksand -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Quicksand', 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+
+        .title-font {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* 3D Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 4px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+        }
+
+        /* Custom Buttons 3D Push effect */
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.15), 0 15px 20px rgba(0,0,0,0.1);
+        }
+        .btn-3d:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Floating animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+        }
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+        .floating-delayed {
+            animation: float 5s ease-in-out 1.5s infinite;
+        }
+
+        /* Pulse glow */
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255,230,0,0.5)); }
+            50% { transform: scale(1.06); filter: drop-shadow(0 0 20px rgba(255,215,0,0.9)); }
+        }
+        .glow-active {
+            animation: pulseGlow 1.8s infinite;
+        }
+
+        /* Canvas Tracing */
+        #tracingCanvas {
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        .shape-shadow {
+            filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.18));
+        }
+
+        /* Hide scrollbars */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between overflow-hidden relative">
+
+    <!-- Top Navigation / Header Status -->
+    <header class="w-full p-4 flex justify-between items-center z-30">
+        <button id="btnBackHome" onclick="goHome()" class="btn-3d bg-amber-400 hover:bg-amber-300 text-amber-900 font-bold px-5 py-2.5 rounded-2xl flex items-center gap-2 border-2 border-white text-lg transition hidden">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span>Trang Chủ</span>
+        </button>
+
+        <div class="flex-1"></div>
+
+        <!-- Speaker / Audio Control & Star Counter -->
+        <div class="flex items-center gap-4">
+            <button onclick="toggleSound()" id="soundToggleBtn" class="btn-3d bg-white text-cyan-600 p-3 rounded-2xl border-2 border-cyan-200 text-xl flex items-center justify-center">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+            </button>
+
+            <div class="glass-card px-5 py-2 rounded-2xl flex items-center gap-3 border-2 border-amber-300">
+                <i class="fa-solid fa-star text-amber-400 text-3xl animate-bounce"></i>
+                <span id="starCount" class="title-font text-3xl text-amber-600 font-bold">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="mainContainer" class="flex-1 w-full max-w-6xl mx-auto px-4 flex flex-col justify-center items-center z-20 relative">
+
+        <!-- ================= 1. HOME SCREEN ================= -->
+        <div id="homeScreen" class="w-full flex flex-col items-center text-center space-y-6 py-2">
+            <!-- Title -->
+            <div class="relative">
+                <h1 class="title-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 drop-shadow-md py-2">
+                    LỚP HỌC HÌNH HỌC VUI NHỘN
+                </h1>
+                <p class="title-font text-2xl sm:text-3xl text-amber-500 font-bold tracking-wide">CÙNG CÔ HUYỀN</p>
+            </div>
+
+            <!-- Banner Character & Geometric Friends -->
+            <div class="relative w-full max-w-2xl h-56 sm:h-64 flex items-center justify-center my-2">
+                <!-- Teacher Visual Card -->
+                <div class="glass-card rounded-3xl p-4 flex items-center gap-6 border-4 border-pink-300 relative z-10 floating">
+                    <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-pink-100 border-4 border-pink-400 overflow-hidden flex-shrink-0 shadow-inner flex items-center justify-center">
+                        <svg viewBox="0 0 200 200" class="w-full h-full">
+                            <!-- Teacher Avatar Graphic -->
+                            <circle cx="100" cy="100" r="90" fill="#FFE0B2"/>
+                            <!-- Hair -->
+                            <path d="M 30,90 Q 100,-20 170,90 Q 180,30 100,10 Q 20,30 30,90 Z" fill="#5D4037"/>
+                            <!-- Face -->
+                            <circle cx="100" cy="105" r="55" fill="#FFCC80"/>
+                            <!-- Eyes -->
+                            <circle cx="80" cy="95" r="7" fill="#3E2723"/>
+                            <circle cx="120" cy="95" r="7" fill="#3E2723"/>
+                            <circle cx="82" cy="93" r="2.5" fill="#FFF"/>
+                            <circle cx="122" cy="93" r="2.5" fill="#FFF"/>
+                            <!-- Cheeks -->
+                            <circle cx="70" cy="110" r="8" fill="#FF8A80" opacity="0.6"/>
+                            <circle cx="130" cy="110" r="8" fill="#FF8A80" opacity="0.6"/>
+                            <!-- Smile -->
+                            <path d="M 85,118 Q 100,135 115,118" fill="none" stroke="#D84315" stroke-width="4" stroke-linecap="round"/>
+                            <!-- Glasses -->
+                            <circle cx="80" cy="95" r="14" fill="none" stroke="#D81B60" stroke-width="3"/>
+                            <circle cx="120" cy="95" r="14" fill="none" stroke="#D81B60" stroke-width="3"/>
+                            <line x1="94" y1="95" x2="106" y2="95" stroke="#D81B60" stroke-width="3"/>
+                            <!-- Clothes -->
+                            <path d="M 45,160 Q 100,140 155,160 L 170,200 L 30,200 Z" fill="#EC407A"/>
+                        </svg>
+                    </div>
+                    <div class="text-left max-w-xs">
+                        <div class="bg-amber-100 text-amber-900 px-4 py-2 rounded-2xl text-base sm:text-lg font-bold border border-amber-300 relative shadow-sm">
+                            <i class="fa-solid fa-comment-dots text-pink-500 mr-2"></i>
+                            "Xin chào các bé! Cô Huyền mời các con cùng khám phá thế giới hình học nhé!"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Shapes background -->
+                <div class="absolute -top-4 left-4 sm:left-12 floating text-red-500">
+                    <svg width="60" height="60" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FF5252" stroke="#FFF" stroke-width="6"/></svg>
+                </div>
+                <div class="absolute top-2 right-4 sm:right-12 floating-delayed">
+                    <svg width="60" height="60" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" rx="10" fill="#42A5F5" stroke="#FFF" stroke-width="6"/></svg>
+                </div>
+                <div class="absolute -bottom-4 left-10 floating-delayed">
+                    <svg width="60" height="60" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="#FFCA28" stroke="#FFF" stroke-width="6"/></svg>
+                </div>
+                <div class="absolute -bottom-4 right-10 floating">
+                    <svg width="70" height="50" viewBox="0 0 120 80"><rect x="5" y="5" width="110" height="70" rx="8" fill="#FFA726" stroke="#FFF" stroke-width="6"/></svg>
+                </div>
+            </div>
+
+            <!-- 2 MAIN NAVIGATION BUTTONS -->
+            <div class="flex flex-col sm:flex-row gap-6 w-full max-w-lg pt-4">
+                <button onclick="startLessons()" class="btn-3d flex-1 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-white font-extrabold py-5 px-6 rounded-3xl border-4 border-white text-2xl flex items-center justify-center gap-3 tracking-wide">
+                    <i class="fa-solid fa-book-open-reader text-3xl"></i>
+                    <span>BÀI HỌC</span>
+                </button>
+                <button onclick="startGamesMenu()" class="btn-3d flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-white font-extrabold py-5 px-6 rounded-3xl border-4 border-white text-2xl flex items-center justify-center gap-3 tracking-wide">
+                    <i class="fa-solid fa-gamepad text-3xl"></i>
+                    <span>TRÒ CHƠI</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= 2. LESSONS SECTION ================= -->
+        <div id="lessonsScreen" class="w-full hidden flex-col items-center space-y-4">
+            <!-- Header bar for lesson -->
+            <div class="w-full flex justify-between items-center glass-card p-3 rounded-2xl border-2 border-teal-200">
+                <h2 class="title-font text-2xl sm:text-3xl font-bold text-teal-700 flex items-center gap-2">
+                    <i class="fa-solid fa-shapes"></i> KÍCH THÍCH KHÁM PHÁ HÌNH HỌC
+                </h2>
+                <span id="lessonCounter" class="bg-teal-100 text-teal-800 font-bold px-4 py-1 rounded-xl text-lg">1 / 4</span>
+            </div>
+
+            <!-- Lesson Card Display -->
+            <div class="w-full glass-card rounded-3xl p-6 border-4 border-white flex flex-col md:flex-row gap-6 items-center min-h-[380px]">
+                <!-- Left: Shape Display + Sound -->
+                <div class="w-full md:w-1/2 flex flex-col items-center justify-center bg-sky-50 rounded-2xl p-6 border-2 border-sky-100 shadow-inner">
+                    <div id="lessonShapeContainer" onclick="speakCurrentLessonShape()" class="cursor-pointer transition transform hover:scale-110 active:scale-95 duration-300 flex items-center justify-center h-48 w-48 relative">
+                        <!-- SVG Shape inserted dynamically -->
+                    </div>
+                    <button onclick="speakCurrentLessonShape()" class="mt-4 btn-3d bg-sky-500 hover:bg-sky-400 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 text-lg">
+                        <i class="fa-solid fa-volume-high"></i>
+                        <span id="lessonShapeName">Hình Tròn</span>
+                    </button>
+                </div>
+
+                <!-- Right: Description + Real Objects -->
+                <div class="w-full md:w-1/2 flex flex-col justify-between space-y-4">
+                    <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-quote-left text-amber-400 text-2xl mt-1"></i>
+                            <p id="lessonTeacherDesc" class="text-lg sm:text-xl font-bold text-slate-700 leading-relaxed">
+                                Cô Huyền đang tải bài học...
+                            </p>
+                        </div>
+                        <button onclick="replayLessonSpeech()" class="mt-2 text-amber-600 font-bold hover:underline flex items-center gap-1 text-sm">
+                            <i class="fa-solid fa-rotate-right"></i> Nghe lại cô giảng
+                        </button>
+                    </div>
+
+                    <!-- Real World Examples -->
+                    <div>
+                        <h4 class="font-bold text-slate-600 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-yellow-500"></i> Đồ vật thực tế xung quanh bé:
+                        </h4>
+                        <div id="lessonRealObjects" class="grid grid-cols-2 gap-3">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson Navigation Arrows -->
+            <div class="flex justify-between w-full max-w-md pt-2">
+                <button onclick="prevLesson()" class="btn-3d bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-6 py-3 rounded-2xl flex items-center gap-2 text-lg">
+                    <i class="fa-solid fa-arrow-left"></i> Hình trước
+                </button>
+                <button onclick="nextLesson()" class="btn-3d bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-6 py-3 rounded-2xl flex items-center gap-2 text-lg">
+                    <span>Hình tiếp</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= 3. GAMES MENU SCREEN ================= -->
+        <div id="gamesMenuScreen" class="w-full hidden flex-col items-center space-y-4">
+            <h2 class="title-font text-3xl sm:text-4xl font-bold text-indigo-700 text-center">
+                THỬ THÁCH TRÒ CHƠI HÌNH HỌC
+            </h2>
+
+            <!-- Grid of 6 Games -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl">
+                <!-- Game 1 -->
+                <div onclick="launchGame(1)" class="glass-card p-4 rounded-2xl border-4 border-pink-300 hover:border-pink-500 transition cursor-pointer flex items-center gap-4 group">
+                    <div class="w-16 h-16 rounded-2xl bg-pink-500 text-white flex items-center justify-center text-3xl font-bold group-hover:scale-110 transition">1</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Bé Chọn Đúng Hình</h3>
+                        <p class="text-xs text-slate-500">Nhận biết & gọi đúng tên hình</p>
+                    </div>
+                </div>
+                <!-- Game 2 -->
+                <div onclick="launchGame(2)" class="glass-card p-4 rounded-2xl border-4 border-blue-300 hover:border-blue-500 transition cursor-pointer flex items-center gap-4 group">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-500 text-white flex items-center justify-center text-3xl font-bold group-hover:scale-110 transition">2</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Tìm Đúng Nhà Cho Hình</h3>
+                        <p class="text-xs text-slate-500">Kéo thả hình vào nhà tương ứng</p>
+                    </div>
+                </div>
+                <!-- Game 3 -->
+                <div onclick="launchGame(3)" class="glass-card p-4 rounded-2xl border-4 border-amber-300 hover:border-amber-500 transition cursor-pointer flex items-center gap-4 group">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-3xl font-bold group-hover:scale-110 transition">3</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Ai Nhanh Mắt Hơn</h3>
+                        <p class="text-xs text-slate-500">Đố vui về đặc điểm các cạnh/góc</p>
+                    </div>
+                </div>
+                <!-- Game 4 -->
+                <div onclick="launchGame(4)" class="glass-card p-4 rounded-2xl border-4 border-emerald-300 hover:border-emerald-500 transition cursor-pointer flex items-center gap-4 group">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-3xl font-bold group-hover:scale-110 transition">4</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Bé Tìm Hình Quanh Lớp</h3>
+                        <p class="text-xs text-slate-500">Tìm đồ vật có hình học thực tế</p>
+                    </div>
+                </div>
+                <!-- Game 5 -->
+                <div onclick="launchGame(5)" class="glass-card p-4 rounded-2xl border-4 border-purple-300 hover:border-purple-500 transition cursor-pointer flex items-center gap-4 group">
+                    <div class="w-16 h-16 rounded-2xl bg-purple-500 text-white flex items-center justify-center text-3xl font-bold group-hover:scale-110 transition">5</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Bé Khéo Tay Ghép Hình</h3>
+                        <p class="text-xs text-slate-500">Ghép hình hoàn thành bức tranh</p>
+                    </div>
+                </div>
+                <!-- Game 6 -->
+                <div onclick="launchGame(6)" class="glass-card p-4 rounded-2xl border-4 border-rose-300 hover:border-rose-500 transition cursor-pointer flex items-center gap-4 group">
+                    <div class="w-16 h-16 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-3xl font-bold group-hover:scale-110 transition">6</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Bé Tập Tô Đồ Hình Học</h3>
+                        <p class="text-xs text-slate-500">Tô theo đường nét đứt sinh động</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 4. GAME PLAY CONTAINER ================= -->
+        <div id="gamePlayScreen" class="w-full hidden flex-col items-center">
+            <!-- Common Game Header -->
+            <div class="w-full flex justify-between items-center mb-3">
+                <button onclick="backToGamesMenu()" class="btn-3d bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-base flex items-center gap-2">
+                    <i class="fa-solid fa-grid-2"></i> Danh sách trò chơi
+                </button>
+                <h3 id="gameTitle" class="title-font text-2xl font-bold text-indigo-700">Tên Trò Chơi</h3>
+                <button onclick="repeatGameInstruction()" class="btn-3d bg-amber-400 hover:bg-amber-300 text-amber-900 font-bold p-2.5 rounded-xl text-base flex items-center gap-1">
+                    <i class="fa-solid fa-circle-question"></i> <span>Hướng dẫn</span>
+                </button>
+            </div>
+
+            <!-- GAME 1 ARENA -->
+            <div id="game1Arena" class="w-full glass-card rounded-3xl p-6 border-4 border-white flex flex-col items-center space-y-6 hidden">
+                <div class="bg-indigo-50 px-6 py-2 rounded-full border border-indigo-200">
+                    <span id="g1Progress" class="font-bold text-indigo-600 text-lg">Câu hỏi 1 / 5</span>
+                </div>
+                <div class="text-2xl font-bold text-slate-700 text-center">Cô Huyền hỏi: <span class="text-pink-600">"Đây là hình gì?"</span></div>
+                
+                <div id="g1TargetShape" class="w-44 h-44 flex items-center justify-center bg-white rounded-3xl shadow-md border-2 border-slate-100 glow-active">
+                    <!-- Dynamic Target Shape -->
+                </div>
+
+                <div id="g1Options" class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-2xl">
+                    <!-- 4 Choice Buttons -->
+                </div>
+            </div>
+
+            <!-- GAME 2 ARENA (Drag & Drop Houses) -->
+            <div id="game2Arena" class="w-full glass-card rounded-3xl p-5 border-4 border-white flex flex-col items-center space-y-4 hidden">
+                <p class="text-lg font-bold text-slate-700 text-center">Bé hãy kéo từng hình vào đúng ngôi nhà có hình dạng tương ứng nhé!</p>
+                
+                <!-- 4 Houses with clear visual shape icons -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
+                    <!-- Circle House -->
+                    <div data-shape="circle" class="g2-house flex flex-col items-center p-3 rounded-2xl bg-red-50 border-2 border-red-300 border-dashed min-h-[160px] justify-between">
+                        <span class="font-bold text-red-600 text-sm sm:text-base">Nhà Hình Tròn</span>
+                        <!-- Visual Shape Icon -->
+                        <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center p-2 border-2 border-red-300 my-1 shadow-sm">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow"><circle cx="50" cy="50" r="42" fill="#FF5252" stroke="#FFF" stroke-width="6"/></svg>
+                        </div>
+                        <div class="house-slot w-full flex flex-wrap gap-1 justify-center items-center min-h-[50px]"></div>
+                    </div>
+
+                    <!-- Square House -->
+                    <div data-shape="square" class="g2-house flex flex-col items-center p-3 rounded-2xl bg-blue-50 border-2 border-blue-300 border-dashed min-h-[160px] justify-between">
+                        <span class="font-bold text-blue-600 text-sm sm:text-base">Nhà Hình Vuông</span>
+                        <!-- Visual Shape Icon -->
+                        <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center p-2 border-2 border-blue-300 my-1 shadow-sm">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow"><rect x="8" y="8" width="84" height="84" rx="6" fill="#42A5F5" stroke="#FFF" stroke-width="6"/></svg>
+                        </div>
+                        <div class="house-slot w-full flex flex-wrap gap-1 justify-center items-center min-h-[50px]"></div>
+                    </div>
+
+                    <!-- Triangle House -->
+                    <div data-shape="triangle" class="g2-house flex flex-col items-center p-3 rounded-2xl bg-amber-50 border-2 border-amber-300 border-dashed min-h-[160px] justify-between">
+                        <span class="font-bold text-amber-600 text-sm sm:text-base">Nhà Tam Giác</span>
+                        <!-- Visual Shape Icon -->
+                        <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center p-2 border-2 border-amber-300 my-1 shadow-sm">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow"><polygon points="50,8 92,90 8,90" fill="#FFCA28" stroke="#FFF" stroke-width="6"/></svg>
+                        </div>
+                        <div class="house-slot w-full flex flex-wrap gap-1 justify-center items-center min-h-[50px]"></div>
+                    </div>
+
+                    <!-- Rectangle House -->
+                    <div data-shape="rectangle" class="g2-house flex flex-col items-center p-3 rounded-2xl bg-orange-50 border-2 border-orange-300 border-dashed min-h-[160px] justify-between">
+                        <span class="font-bold text-orange-600 text-sm sm:text-base">Nhà Chữ Nhật</span>
+                        <!-- Visual Shape Icon -->
+                        <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center p-1.5 border-2 border-orange-300 my-1 shadow-sm">
+                            <svg viewBox="0 0 120 80" class="w-full h-full drop-shadow"><rect x="6" y="6" width="108" height="68" rx="6" fill="#FFA726" stroke="#FFF" stroke-width="6"/></svg>
+                        </div>
+                        <div class="house-slot w-full flex flex-wrap gap-1 justify-center items-center min-h-[50px]"></div>
+                    </div>
+                </div>
+
+                <!-- Draggable Items Pool -->
+                <div id="g2Draggables" class="w-full bg-white/70 rounded-2xl p-4 border-2 border-indigo-100 flex flex-wrap gap-4 justify-center items-center min-h-[90px]">
+                    <!-- Dynamic Draggable Shapes -->
+                </div>
+            </div>
+
+            <!-- GAME 3 ARENA (Riddles on Properties) -->
+            <div id="game3Arena" class="w-full glass-card rounded-3xl p-6 border-4 border-white flex flex-col items-center space-y-6 hidden">
+                <div class="bg-amber-100 px-6 py-2 rounded-2xl border border-amber-300 text-center max-w-xl">
+                    <span id="g3QuestionText" class="font-bold text-amber-900 text-xl sm:text-2xl">
+                        "Hình nào có 3 cạnh và 3 góc?"
+                    </span>
+                </div>
+
+                <div id="g3Options" class="grid grid-cols-2 sm:grid-cols-4 gap-6 w-full max-w-3xl">
+                    <!-- 4 Interactive Option Shapes -->
+                </div>
+            </div>
+
+            <!-- GAME 4 ARENA (Find Items in Classroom) -->
+            <div id="game4Arena" class="w-full glass-card rounded-3xl p-5 border-4 border-white flex flex-col items-center space-y-4 hidden">
+                <div class="bg-emerald-100 px-6 py-2 rounded-full border border-emerald-300 text-center">
+                    <span id="g4Instruction" class="font-bold text-emerald-800 text-xl">
+                        Các con hãy tìm những đồ vật có dạng HÌNH TRÒN nhé!
+                    </span>
+                </div>
+
+                <!-- Interactive Classroom Canvas/Grid -->
+                <div id="g4ClassroomGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-4 w-full max-w-3xl bg-amber-50/60 p-4 rounded-2xl border-2 border-amber-200">
+                    <!-- Classroom real objects inserted dynamically -->
+                </div>
+            </div>
+
+            <!-- GAME 5 ARENA (Shape Tangram Puzzle) -->
+            <div id="game5Arena" class="w-full glass-card rounded-3xl p-5 border-4 border-white flex flex-col sm:flex-row gap-6 items-center justify-center hidden">
+                <!-- Target Outline Picture (House built of shapes) -->
+                <div class="flex flex-col items-center">
+                    <h4 class="font-bold text-slate-700 mb-2">Bức tranh khung nhà:</h4>
+                    <div id="g5PuzzleCanvas" class="w-64 h-64 bg-sky-100 rounded-2xl border-4 border-sky-300 relative flex items-center justify-center shadow-inner">
+                        <!-- Outline slots -->
+                        <!-- Roof (Triangle) -->
+                        <div data-target="triangle" class="g5-slot absolute top-4 w-0 h-0 border-l-[70px] border-r-[70px] border-b-[80px] border-l-transparent border-r-transparent border-b-slate-300 border-dashed"></div>
+                        <!-- Main Body (Square) -->
+                        <div data-target="square" class="g5-slot absolute bottom-6 left-8 w-28 h-28 border-4 border-slate-300 border-dashed rounded-lg"></div>
+                        <!-- Door (Rectangle) -->
+                        <div data-target="rectangle" class="g5-slot absolute bottom-6 right-10 w-14 h-20 border-4 border-slate-300 border-dashed rounded-md"></div>
+                        <!-- Window (Circle) -->
+                        <div data-target="circle" class="g5-slot absolute bottom-20 left-12 w-12 h-12 border-4 border-slate-300 border-dashed rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- Pieces to drag -->
+                <div class="flex flex-col items-center space-y-3">
+                    <h4 class="font-bold text-slate-700">Các mảnh ghép:</h4>
+                    <div id="g5Pieces" class="flex flex-wrap sm:flex-col gap-4 p-4 bg-white/80 rounded-2xl border-2 border-slate-200 justify-center items-center">
+                        <!-- Puzzle Pieces -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- GAME 6 ARENA (Tracing Shapes Canvas) -->
+            <div id="game6Arena" class="w-full glass-card rounded-3xl p-5 border-4 border-white flex flex-col items-center space-y-4 hidden">
+                <!-- Select Shape to Trace -->
+                <div class="flex gap-2 sm:gap-4 justify-center flex-wrap">
+                    <button onclick="selectTraceShape('circle')" class="g6-select-btn btn-3d bg-red-400 hover:bg-red-300 text-white font-bold px-3 py-1.5 rounded-xl text-sm">Hình Tròn</button>
+                    <button onclick="selectTraceShape('square')" class="g6-select-btn btn-3d bg-blue-400 hover:bg-blue-300 text-white font-bold px-3 py-1.5 rounded-xl text-sm">Hình Vuông</button>
+                    <button onclick="selectTraceShape('triangle')" class="g6-select-btn btn-3d bg-amber-400 hover:bg-amber-300 text-white font-bold px-3 py-1.5 rounded-xl text-sm">Tam Giác</button>
+                    <button onclick="selectTraceShape('rectangle')" class="g6-select-btn btn-3d bg-orange-400 hover:bg-orange-300 text-white font-bold px-3 py-1.5 rounded-xl text-sm">Chữ Nhật</button>
+                </div>
+
+                <!-- Canvas Box -->
+                <div class="relative bg-white rounded-3xl border-4 border-indigo-200 shadow-md p-2">
+                    <canvas id="tracingCanvas" width="340" height="300" class="rounded-2xl"></canvas>
+                </div>
+
+                <!-- Color Palette & Clear Button -->
+                <div class="flex items-center gap-4">
+                    <div class="flex gap-2 bg-slate-100 p-2 rounded-2xl border">
+                        <button onclick="setTraceColor('#FF2D55')" class="w-8 h-8 rounded-full bg-pink-500 border-2 border-white shadow hover:scale-110 transition"></button>
+                        <button onclick="setTraceColor('#4CD964')" class="w-8 h-8 rounded-full bg-green-500 border-2 border-white shadow hover:scale-110 transition"></button>
+                        <button onclick="setTraceColor('#5AC8FA')" class="w-8 h-8 rounded-full bg-sky-400 border-2 border-white shadow hover:scale-110 transition"></button>
+                        <button onclick="setTraceColor('#FF9500')" class="w-8 h-8 rounded-full bg-orange-500 border-2 border-white shadow hover:scale-110 transition"></button>
+                        <button onclick="setTraceColor('#AF52DE')" class="w-8 h-8 rounded-full bg-purple-500 border-2 border-white shadow hover:scale-110 transition"></button>
+                    </div>
+
+                    <button onclick="clearTracingCanvas()" class="btn-3d bg-rose-500 hover:bg-rose-400 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-1">
+                        <i class="fa-solid fa-eraser"></i> Xóa vẽ lại
+                    </button>
+                    <button onclick="finishTracing()" class="btn-3d bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-1">
+                        <i class="fa-solid fa-check"></i> Hoàn thành
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 5. REWARD / CERTIFICATE MODAL ================= -->
+        <div id="rewardModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="glass-card bg-white/95 rounded-3xl p-6 sm:p-8 max-w-xl w-full border-4 border-amber-300 text-center flex flex-col items-center space-y-5 animate-bounce-short shadow-2xl relative">
+                <!-- Trophy Icon -->
+                <div class="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center border-4 border-amber-400 text-amber-500 text-5xl floating">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+
+                <h2 class="title-font text-3xl sm:text-4xl font-extrabold text-amber-600">XUẤT SẮC QUÁ!</h2>
+
+                <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
+                    <p id="rewardSpeechText" class="text-lg font-bold text-slate-700">
+                        "Chúc mừng các con! Các con đã hoàn thành xuất sắc lớp học hình học vui nhộn. Cô tặng các con thật nhiều ngôi sao nhé!"
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3 bg-yellow-100 px-6 py-3 rounded-full border border-yellow-300">
+                    <span class="text-xl font-bold text-amber-800">Tổng cộng bé đạt:</span>
+                    <span id="finalStarCount" class="title-font text-3xl font-extrabold text-amber-600">6</span>
+                    <i class="fa-solid fa-star text-amber-500 text-3xl"></i>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="flex gap-4 w-full pt-2">
+                    <button onclick="restartAllGames()" class="btn-3d flex-1 bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-3 px-4 rounded-2xl text-lg">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> CHƠI LẠI
+                    </button>
+                    <button onclick="goHome()" class="btn-3d flex-1 bg-amber-500 hover:bg-amber-400 text-white font-bold py-3 px-4 rounded-2xl text-lg">
+                        <i class="fa-solid fa-house mr-1"></i> TRANG CHỦ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Credit -->
+    <footer class="w-full text-center py-2 text-xs text-slate-500 font-bold z-10">
+        Lớp Học Hình Học Vui Nhộn Cùng Cô Huyền &copy; Trải nghiệm Giáo dục Mầm non 4-5 Tuổi
+    </footer>
+
+    <!-- AUDIO SYNTHESIS & APP LOGIC -->
+    <script>
+        /* ----------------------------------------------------
+           DATA STRUCTURES & STATE
+        ---------------------------------------------------- */
+        let stars = 0;
+        let soundEnabled = true;
+        let currentLessonIndex = 0;
+        let completedGames = new Set();
+        let synth = window.speechSynthesis;
+
+        // Lesson Data
+        const lessonsData = [
+            {
+                id: 'circle',
+                name: 'Hình Tròn',
+                color: '#FF5252',
+                speech: 'Đây là hình tròn. Hình tròn có đường bao cong khép kín và không có cạnh, không có góc.',
+                desc: 'Hình tròn có đường bao cong khép kín, lăn trôi rất nhanh và không có cạnh, không có góc nào đâu bé nhé!',
+                svg: `<svg viewBox="0 0 100 100" class="w-40 h-40 shape-shadow"><circle cx="50" cy="50" r="42" fill="#FF5252" stroke="#FFF" stroke-width="6"/></svg>`,
+                items: [
+                    { name: 'Bánh xe', icon: 'fa-dharmachakra', color: 'text-sky-500' },
+                    { name: 'Đồng hồ', icon: 'fa-clock', color: 'text-amber-500' }
+                ]
+            },
+            {
+                id: 'square',
+                name: 'Hình Vuông',
+                color: '#42A5F5',
+                speech: 'Đây là hình vuông. Hình vuông có 4 cạnh bằng nhau và có 4 góc.',
+                desc: 'Hình vuông xinh xắn có đúng 4 cạnh dài bằng nhau và có 4 góc vuông vắn!',
+                svg: `<svg viewBox="0 0 100 100" class="w-40 h-40 shape-shadow"><rect x="8" y="8" width="84" height="84" rx="6" fill="#42A5F5" stroke="#FFF" stroke-width="6"/></svg>`,
+                items: [
+                    { name: 'Khăn tay', icon: 'fa-square', color: 'text-pink-500' },
+                    { name: 'Viên gạch', icon: 'fa-cubes', color: 'text-emerald-500' }
+                ]
+            },
+            {
+                id: 'triangle',
+                name: 'Hình Tam Giác',
+                color: '#FFCA28',
+                speech: 'Đây là hình tam giác. Hình tam giác có 3 cạnh và 3 góc.',
+                desc: 'Hình tam giác nổi bật có 3 cạnh nối với nhau tạo thành 3 góc nhọn cá tính!',
+                svg: `<svg viewBox="0 0 100 100" class="w-40 h-40 shape-shadow"><polygon points="50,8 92,90 8,90" fill="#FFCA28" stroke="#FFF" stroke-width="6"/></svg>`,
+                items: [
+                    { name: 'Biển báo', icon: 'fa-triangle-exclamation', color: 'text-red-500' },
+                    { name: 'Mái nhà', icon: 'fa-house-chimney', color: 'text-indigo-500' }
+                ]
+            },
+            {
+                id: 'rectangle',
+                name: 'Hình Chữ Nhật',
+                color: '#FFA726',
+                speech: 'Đây là hình chữ nhật. Hình chữ nhật có 4 cạnh, trong đó hai cạnh dài bằng nhau và hai cạnh ngắn bằng nhau. Hình có 4 góc.',
+                desc: 'Hình chữ nhật có 4 cạnh: gồm 2 cạnh dài bằng nhau, 2 cạnh ngắn bằng nhau và có 4 góc!',
+                svg: `<svg viewBox="0 0 120 80" class="w-48 h-32 shape-shadow"><rect x="6" y="6" width="108" height="68" rx="6" fill="#FFA726" stroke="#FFF" stroke-width="6"/></svg>`,
+                items: [
+                    { name: 'Quyển sách', icon: 'fa-book', color: 'text-blue-500' },
+                    { name: 'Cánh cửa', icon: 'fa-door-closed', color: 'text-amber-700' }
+                ]
+            }
+        ];
+
+        /* ----------------------------------------------------
+           VOICE & AUDIO SYNTHESIS (TTS & SFX)
+        ---------------------------------------------------- */
+        function speakText(text, callback) {
+            if (!soundEnabled) {
+                if (callback) callback();
+                return;
+            }
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 0.88; // Gentle speed for kids
+            utterance.pitch = 1.1; // Slightly friendly higher pitch
+
+            // Try selecting Vietnamese voice if available
+            const voices = synth.getVoices();
+            const viVoice = voices.find(v => v.lang.includes('vi'));
+            if (viVoice) utterance.voice = viVoice;
+
+            if (callback) {
+                utterance.onend = callback;
+            }
+            synth.speak(utterance);
+        }
+
+        // Web Audio API Sound Effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSFX(type) {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'pop') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                }
+            } catch(e) { console.log(e); }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                speakText("Âm thanh đã mở");
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                if (synth.speaking) synth.cancel();
+            }
+        }
+
+        function addStar() {
+            stars += 1;
+            document.getElementById('starCount').innerText = stars;
+            playSFX('correct');
+        }
+
+        /* ----------------------------------------------------
+           NAVIGATION CONTROLLER
+        ---------------------------------------------------- */
+        function hideAllScreens() {
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('lessonsScreen').classList.add('hidden');
+            document.getElementById('lessonsScreen').classList.remove('flex');
+            document.getElementById('gamesMenuScreen').classList.add('hidden');
+            document.getElementById('gamesMenuScreen').classList.remove('flex');
+            document.getElementById('gamePlayScreen').classList.add('hidden');
+            document.getElementById('gamePlayScreen').classList.remove('flex');
+        }
+
+        function goHome() {
+            if (synth.speaking) synth.cancel();
+            hideAllScreens();
+            document.getElementById('homeScreen').classList.remove('hidden');
+            document.getElementById('btnBackHome').classList.add('hidden');
+            speakText("Xin chào các bé! Cô Huyền mời các con cùng khám phá thế giới hình học thật vui nhé!");
+        }
+
+        function startLessons() {
+            hideAllScreens();
+            document.getElementById('btnBackHome').classList.remove('hidden');
+            document.getElementById('lessonsScreen').classList.remove('hidden');
+            document.getElementById('lessonsScreen').classList.add('flex');
+            currentLessonIndex = 0;
+            renderLesson();
+        }
+
+        function startGamesMenu() {
+            hideAllScreens();
+            document.getElementById('btnBackHome').classList.remove('hidden');
+            document.getElementById('gamesMenuScreen').classList.remove('hidden');
+            document.getElementById('gamesMenuScreen').classList.add('flex');
+            speakText("Bé hãy chọn một trò chơi thật vui nào!");
+        }
+
+        /* ----------------------------------------------------
+           LESSONS MODULE
+        ---------------------------------------------------- */
+        function renderLesson() {
+            const lesson = lessonsData[currentLessonIndex];
+            document.getElementById('lessonCounter').innerText = `${currentLessonIndex + 1} / ${lessonsData.length}`;
+            document.getElementById('lessonShapeContainer').innerHTML = lesson.svg;
+            document.getElementById('lessonShapeName').innerText = lesson.name;
+            document.getElementById('lessonTeacherDesc').innerText = lesson.desc;
+
+            // Render real objects
+            const objContainer = document.getElementById('lessonRealObjects');
+            objContainer.innerHTML = '';
+            lesson.items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3';
+                card.innerHTML = `
+                    <div class="text-3xl ${item.color}"><i class="fa-solid ${item.icon}"></i></div>
+                    <span class="font-bold text-slate-700">${item.name}</span>
+                `;
+                objContainer.appendChild(card);
+            });
+
+            // Auto speak teacher introduction
+            speakText(lesson.speech);
+        }
+
+        function speakCurrentLessonShape() {
+            const lesson = lessonsData[currentLessonIndex];
+            playSFX('pop');
+            speakText(lesson.name);
+        }
+
+        function replayLessonSpeech() {
+            const lesson = lessonsData[currentLessonIndex];
+            speakText(lesson.speech);
+        }
+
+        function nextLesson() {
+            playSFX('pop');
+            currentLessonIndex = (currentLessonIndex + 1) % lessonsData.length;
+            renderLesson();
+        }
+
+        function prevLesson() {
+            playSFX('pop');
+            currentLessonIndex = (currentLessonIndex - 1 + lessonsData.length) % lessonsData.length;
+            renderLesson();
+        }
+
+        /* ----------------------------------------------------
+           GAME ENGINE & LAUNCHER
+        ---------------------------------------------------- */
+        let currentGameId = 0;
+
+        function launchGame(gameId) {
+            currentGameId = gameId;
+            hideAllScreens();
+            document.getElementById('btnBackHome').classList.remove('hidden');
+            document.getElementById('gamePlayScreen').classList.remove('hidden');
+            document.getElementById('gamePlayScreen').classList.add('flex');
+
+            // Hide all game arenas
+            for (let i = 1; i <= 6; i++) {
+                const arena = document.getElementById(`game${i}Arena`);
+                if (arena) arena.classList.add('hidden');
+            }
+
+            // Show selected arena & init
+            const activeArena = document.getElementById(`game${gameId}Arena`);
+            if (activeArena) activeArena.classList.remove('hidden');
+
+            switch (gameId) {
+                case 1: initGame1(); break;
+                case 2: initGame2(); break;
+                case 3: initGame3(); break;
+                case 4: initGame4(); break;
+                case 5: initGame5(); break;
+                case 6: initGame6(); break;
+            }
+        }
+
+        function backToGamesMenu() {
+            if (synth.speaking) synth.cancel();
+            startGamesMenu();
+        }
+
+        function repeatGameInstruction() {
+            switch(currentGameId) {
+                case 1: speakText("Đây là hình gì? Bé hãy chọn đáp án đúng phía dưới nhé!"); break;
+                case 2: speakText("Bé hãy kéo các hình vào đúng ngôi nhà tương ứng nhé!"); break;
+                case 3: speakText("Bé lắng nghe câu hỏi và chọn đúng hình nhé!"); break;
+                case 4: speakText("Bé hãy tìm các đồ vật theo đúng hình dạng cô yêu cầu nào!"); break;
+                case 5: speakText("Bé hãy kéo các mảnh ghép vào vị trí nét đứt để hoàn thành ngôi nhà nhé!"); break;
+                case 6: speakText("Bé hãy di chuyển ngón tay hoặc chuột theo đường nét đứt để tô hình nhé!"); break;
+            }
+        }
+
+        function checkOverallProgress(gameId) {
+            completedGames.add(gameId);
+            addStar();
+            if (completedGames.size >= 6) {
+                setTimeout(showRewardModal, 1500);
+            }
+        }
+
+        /* ================= GAME 1: BÉ CHỌN ĐÚNG HÌNH ================= */
+        let g1Questions = [];
+        let g1CurrentIdx = 0;
+
+        function initGame1() {
+            document.getElementById('gameTitle').innerText = "TRÒ CHƠI 1: BÉ CHỌN ĐÚNG HÌNH";
+            // Generate 5 shuffled questions
+            g1Questions = [
+                { target: lessonsData[0], options: shuffle([...lessonsData]) },
+                { target: lessonsData[1], options: shuffle([...lessonsData]) },
+                { target: lessonsData[2], options: shuffle([...lessonsData]) },
+                { target: lessonsData[3], options: shuffle([...lessonsData]) },
+                { target: lessonsData[Math.floor(Math.random()*4)], options: shuffle([...lessonsData]) }
+            ];
+            g1CurrentIdx = 0;
+            renderG1Question();
+            speakText("Trò chơi Bé chọn đúng hình. Đây là hình gì?");
+        }
+
+        function renderG1Question() {
+            const q = g1Questions[g1CurrentIdx];
+            document.getElementById('g1Progress').innerText = `Câu hỏi ${g1CurrentIdx + 1} / 5`;
+            document.getElementById('g1TargetShape').innerHTML = q.target.svg;
+
+            const optsDiv = document.getElementById('g1Options');
+            optsDiv.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-3d bg-white hover:bg-sky-50 p-4 rounded-2xl border-4 border-sky-200 flex flex-col items-center justify-center gap-2 font-bold text-slate-700 text-lg transition';
+                btn.innerHTML = `
+                    <div class="w-16 h-16 flex items-center justify-center">${opt.svg}</div>
+                    <span>${opt.name}</span>
+                `;
+                btn.onclick = () => handleG1Answer(opt.id, q.target.id);
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function handleG1Answer(selectedId, correctId) {
+            if (selectedId === correctId) {
+                playSFX('correct');
+                confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+                speakText("Chính xác! Bé giỏi quá!", () => {
+                    g1CurrentIdx++;
+                    if (g1CurrentIdx < g1Questions.length) {
+                        renderG1Question();
+                    } else {
+                        speakText("Chúc mừng bé đã hoàn thành xuất sắc trò chơi chọn đúng hình!");
+                        checkOverallProgress(1);
+                    }
+                });
+            } else {
+                playSFX('wrong');
+                speakText("Con quan sát lại nhé!");
+            }
+        }
+
+        /* ================= GAME 2: TÌM ĐÚNG NHÀ CHO HÌNH ================= */
+        let g2Remaining = 0;
+
+        function initGame2() {
+            document.getElementById('gameTitle').innerText = "TRÒ CHƠI 2: TÌM ĐÚNG NHÀ CHO HÌNH";
+            // Clear house slots
+            document.querySelectorAll('.house-slot').forEach(slot => slot.innerHTML = '');
+            
+            const pool = [
+                { id: 'c1', shape: 'circle', color: '#FF5252', svg: `<svg width="40" height="40" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#FF5252"/></svg>` },
+                { id: 's1', shape: 'square', color: '#42A5F5', svg: `<svg width="40" height="40" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" rx="8" fill="#42A5F5"/></svg>` },
+                { id: 't1', shape: 'triangle', color: '#FFCA28', svg: `<svg width="40" height="40" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="#FFCA28"/></svg>` },
+                { id: 'r1', shape: 'rectangle', color: '#FFA726', svg: `<svg width="50" height="35" viewBox="0 0 120 80"><rect x="5" y="5" width="110" height="70" rx="8" fill="#FFA726"/></svg>` },
+                { id: 'c2', shape: 'circle', color: '#E91E63', svg: `<svg width="36" height="36" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#E91E63"/></svg>` },
+                { id: 's2', shape: 'square', color: '#00BCD4', svg: `<svg width="36" height="36" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" rx="8" fill="#00BCD4"/></svg>` }
+            ];
+
+            g2Remaining = pool.length;
+            const container = document.getElementById('g2Draggables');
+            container.innerHTML = '';
+
+            shuffle(pool).forEach(item => {
+                const elem = document.createElement('div');
+                elem.className = 'cursor-grab active:cursor-grabbing p-2 bg-white rounded-xl shadow border-2 border-slate-200 transform hover:scale-110 transition';
+                elem.setAttribute('draggable', 'true');
+                elem.dataset.shape = item.shape;
+                elem.id = item.id;
+                elem.innerHTML = item.svg;
+
+                // Drag Events
+                elem.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', item.shape);
+                    e.dataTransfer.setData('elementId', item.id);
+                });
+
+                // Touch Drag handling fallback
+                makeTouchDraggable(elem);
+
+                container.appendChild(elem);
+            });
+
+            // Set drop targets
+            document.querySelectorAll('.g2-house').forEach(house => {
+                house.addEventListener('dragover', (e) => e.preventDefault());
+                house.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const shapeType = e.dataTransfer.getData('text/plain');
+                    const elemId = e.dataTransfer.getData('elementId');
+                    handleG2Drop(shapeType, house.dataset.shape, elemId, house);
+                });
+            });
+
+            speakText("Bé hãy kéo từng hình vào đúng ngôi nhà tương ứng nhé!");
+        }
+
+        function handleG2Drop(draggedShape, houseShape, elemId, houseElem) {
+            const draggedElem = document.getElementById(elemId);
+            if (!draggedElem) return;
+
+            if (draggedShape === houseShape) {
+                playSFX('correct');
+                houseElem.querySelector('.house-slot').appendChild(draggedElem);
+                draggedElem.setAttribute('draggable', 'false');
+                draggedElem.classList.remove('cursor-grab');
+                draggedElem.classList.add('cursor-default');
+
+                g2Remaining--;
+                if (g2Remaining === 0) {
+                    confetti({ particleCount: 50 });
+                    speakText("Tuyệt vời! Bé đã xếp đúng tất cả các hình vào nhà rồi!");
+                    checkOverallProgress(2);
+                }
+            } else {
+                playSFX('wrong');
+                speakText("Ôi, nhầm nhà rồi con ơi!");
+            }
+        }
+
+        /* Touch Drag support helper */
+        function makeTouchDraggable(elem) {
+            let origX, origY;
+            elem.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                origX = elem.offsetLeft;
+                origY = elem.offsetTop;
+                elem.style.position = 'absolute';
+                elem.style.zIndex = '1000';
+            }, {passive: true});
+
+            elem.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                elem.style.left = (touch.clientX - 30) + 'px';
+                elem.style.top = (touch.clientY - 30) + 'px';
+            }, {passive: true});
+
+            elem.addEventListener('touchend', (e) => {
+                const touch = e.changedTouches[0];
+                elem.style.position = 'static';
+                elem.style.zIndex = 'auto';
+
+                // Find element under touch point
+                const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+                const house = dropTarget ? dropTarget.closest('.g2-house, .g5-slot') : null;
+                
+                if (house) {
+                    if (house.classList.contains('g2-house')) {
+                        handleG2Drop(elem.dataset.shape, house.dataset.shape, elem.id, house);
+                    } else if (house.classList.contains('g5-slot')) {
+                        handleG5Drop(elem.dataset.shape, house.dataset.target, elem, house);
+                    }
+                }
+            });
+        }
+
+        /* ================= GAME 3: AI NHANH MẮT HƠN ================= */
+        let g3Questions = [];
+        let g3CurrentIdx = 0;
+
+        function initGame3() {
+            document.getElementById('gameTitle').innerText = "TRÒ CHƠI 3: AI NHANH MẮT HƠN";
+            g3Questions = [
+                { question: "Hình nào có 3 cạnh và 3 góc?", correct: "triangle" },
+                { question: "Hình nào có 4 cạnh bằng nhau?", correct: "square" },
+                { question: "Hình nào không có cạnh và không có góc?", correct: "circle" },
+                { question: "Hình nào có 4 cạnh, gồm 2 cạnh dài và 2 cạnh ngắn?", correct: "rectangle" }
+            ];
+            g3CurrentIdx = 0;
+            renderG3Question();
+        }
+
+        function renderG3Question() {
+            const q = g3Questions[g3CurrentIdx];
+            document.getElementById('g3QuestionText').innerText = `"${q.question}"`;
+            speakText(q.question);
+
+            const optsDiv = document.getElementById('g3Options');
+            optsDiv.innerHTML = '';
+
+            lessonsData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'btn-3d bg-white p-5 rounded-3xl border-4 border-amber-200 flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 transition';
+                card.innerHTML = `
+                    <div class="w-24 h-24 flex items-center justify-center">${item.svg}</div>
+                    <span class="mt-2 font-bold text-slate-700 text-lg">${item.name}</span>
+                `;
+                card.onclick = () => {
+                    if (item.id === q.correct) {
+                        playSFX('correct');
+                        confetti({ particleCount: 30 });
+                        speakText("Bé trả lời đúng rồi! Giỏi quá!", () => {
+                            g3CurrentIdx++;
+                            if (g3CurrentIdx < g3Questions.length) {
+                                renderG3Question();
+                            } else {
+                                speakText("Chúc mừng bé đã tinh mắt trả lời hết các câu đố!");
+                                checkOverallProgress(3);
+                            }
+                        });
+                    } else {
+                        playSFX('wrong');
+                        speakText("Chưa đúng rồi, con suy nghĩ kỹ lại nhé!");
+                    }
+                };
+                optsDiv.appendChild(card);
+            });
+        }
+
+        /* ================= GAME 4: BÉ TÌM HÌNH QUANH LỚP ================= */
+        let g4Rounds = [];
+        let g4CurrentRound = 0;
+
+        const classroomObjects = [
+            { id: 1, name: 'Đồng hồ', shape: 'circle', icon: 'fa-clock', color: 'text-red-500' },
+            { id: 2, name: 'Khăn tay', shape: 'square', icon: 'fa-square', color: 'text-blue-500' },
+            { id: 3, name: 'Biển báo', shape: 'triangle', icon: 'fa-triangle-exclamation', color: 'text-amber-500' },
+            { id: 4, name: 'Quyển sách', shape: 'rectangle', icon: 'fa-book', color: 'text-orange-500' },
+            { id: 5, name: 'Bánh xe', shape: 'circle', icon: 'fa-dharmachakra', color: 'text-pink-500' },
+            { id: 6, name: 'Cửa sổ', shape: 'square', icon: 'fa-table-cells-large', color: 'text-emerald-500' },
+            { id: 7, name: 'Mái nhà', shape: 'triangle', icon: 'fa-house-chimney', color: 'text-purple-500' },
+            { id: 8, name: 'Cánh cửa', shape: 'rectangle', icon: 'fa-door-closed', color: 'text-teal-600' }
+        ];
+
+        function initGame4() {
+            document.getElementById('gameTitle').innerText = "TRÒ CHƠI 4: BÉ TÌM HÌNH QUANH LỚP";
+            g4Rounds = ['circle', 'square', 'triangle', 'rectangle'];
+            g4CurrentRound = 0;
+            renderG4Round();
+        }
+
+        function renderG4Round() {
+            const targetShape = g4Rounds[g4CurrentRound];
+            let shapeNameVN = "";
+            if (targetShape === 'circle') shapeNameVN = "HÌNH TRÒN";
+            if (targetShape === 'square') shapeNameVN = "HÌNH VUÔNG";
+            if (targetShape === 'triangle') shapeNameVN = "HÌNH TAM GIÁC";
+            if (targetShape === 'rectangle') shapeNameVN = "HÌNH CHỮ NHẬT";
+
+            const instructionText = `Các con hãy tìm những đồ vật có dạng ${shapeNameVN} nhé!`;
+            document.getElementById('g4Instruction').innerText = instructionText;
+            speakText(instructionText);
+
+            const grid = document.getElementById('g4ClassroomGrid');
+            grid.innerHTML = '';
+
+            shuffle([...classroomObjects]).forEach(obj => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-2xl border-2 border-slate-200 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-emerald-400 transition shadow-sm';
+                card.innerHTML = `
+                    <div class="text-4xl ${obj.color}"><i class="fa-solid ${obj.icon}"></i></div>
+                    <span class="font-bold text-slate-700 text-sm sm:text-base">${obj.name}</span>
+                `;
+                card.onclick = () => {
+                    if (obj.shape === targetShape) {
+                        playSFX('correct');
+                        card.classList.add('bg-emerald-100', 'border-emerald-500', 'glow-active');
+                        speakText(`Đúng rồi! ${obj.name} có dạng ${shapeNameVN}!`, () => {
+                            g4CurrentRound++;
+                            if (g4CurrentRound < g4Rounds.length) {
+                                renderG4Round();
+                            } else {
+                                speakText("Xuất sắc! Bé đã tìm đúng tất cả đồ vật xung quanh lớp!");
+                                checkOverallProgress(4);
+                            }
+                        });
+                    } else {
+                        playSFX('wrong');
+                        speakText("Đồ vật này chưa đúng hình cô yêu cầu rồi!");
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        /* ================= GAME 5: BÉ KHÉO TAY GHÉP HÌNH ================= */
+        let g5Remaining = 4;
+
+        function initGame5() {
+            document.getElementById('gameTitle').innerText = "TRÒ CHƠI 5: BÉ KHÉO TAY GHÉP HÌNH";
+            g5Remaining = 4;
+
+            // Reset slots styling
+            document.querySelectorAll('.g5-slot').forEach(slot => {
+                slot.style.backgroundColor = 'transparent';
+                slot.innerHTML = '';
+            });
+
+            const piecesContainer = document.getElementById('g5Pieces');
+            piecesContainer.innerHTML = '';
+
+            const pieces = [
+                { shape: 'triangle', svg: `<svg width="70" height="70" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="#FF5252"/></svg>` },
+                { shape: 'square', svg: `<svg width="60" height="60" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="#42A5F5" rx="6"/></svg>` },
+                { shape: 'rectangle', svg: `<svg width="45" height="65" viewBox="0 0 80 120"><rect x="10" y="10" width="60" height="100" fill="#FFA726" rx="6"/></svg>` },
+                { shape: 'circle', svg: `<svg width="50" height="50" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#FFCA28"/></svg>` }
+            ];
+
+            shuffle(pieces).forEach((item, idx) => {
+                const elem = document.createElement('div');
+                elem.className = 'cursor-grab p-2 bg-slate-50 rounded-xl border border-slate-300 hover:scale-105 transition';
+                elem.setAttribute('draggable', 'true');
+                elem.dataset.shape = item.shape;
+                elem.id = `g5_piece_${idx}`;
+                elem.innerHTML = item.svg;
+
+                elem.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', item.shape);
+                    e.dataTransfer.setData('elementId', elem.id);
+                });
+
+                makeTouchDraggable(elem);
+                piecesContainer.appendChild(elem);
+            });
+
+            // Set slot drag events
+            document.querySelectorAll('.g5-slot').forEach(slot => {
+                slot.addEventListener('dragover', (e) => e.preventDefault());
+                slot.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const shapeType = e.dataTransfer.getData('text/plain');
+                    const elemId = e.dataTransfer.getData('elementId');
+                    const elem = document.getElementById(elemId);
+                    handleG5Drop(shapeType, slot.dataset.target, elem, slot);
+                });
+            });
+
+            speakText("Bé hãy kéo các mảnh ghép vào đúng đường nét đứt để dựng ngôi nhà nhé!");
+        }
+
+        function handleG5Drop(draggedShape, targetShape, pieceElem, slotElem) {
+            if (!pieceElem) return;
+            if (draggedShape === targetShape) {
+                playSFX('correct');
+                slotElem.appendChild(pieceElem);
+                pieceElem.setAttribute('draggable', 'false');
+                pieceElem.style.pointerEvents = 'none';
+                g5Remaining--;
+
+                if (g5Remaining === 0) {
+                    confetti({ particleCount: 60 });
+                    speakText("Tuyệt vời! Bé đã ghép thành công bức tranh ngôi nhà hình học thật đẹp!");
+                    checkOverallProgress(5);
+                }
+            } else {
+                playSFX('wrong');
+                speakText("Mảnh ghép này chưa khớp vị trí này rồi!");
+            }
+        }
+
+        /* ================= GAME 6: BÉ TẬP TÔ ĐỒ HÌNH HỌC ================= */
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentTraceColor = '#FF2D55';
+        let currentTraceShape = 'circle';
+
+        function initGame6() {
+            document.getElementById('gameTitle').innerText = "TRÒ CHƠI 6: BÉ TẬP TÔ ĐỒ HÌNH HỌC";
+            canvas = document.getElementById('tracingCanvas');
+            ctx = canvas.getContext('2d');
+
+            // Mouse & Touch listeners for Canvas
+            canvas.onmousedown = startDrawing;
+            canvas.onmousemove = draw;
+            canvas.onmouseup = stopDrawing;
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                startDrawing({ clientX: touch.clientX, clientY: touch.clientY, rect });
+            }, {passive: false});
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                draw({ clientX: touch.clientX, clientY: touch.clientY, rect });
+            }, {passive: false});
+
+            canvas.addEventListener('touchend', stopDrawing);
+
+            selectTraceShape('circle');
+            speakText("Bé hãy dùng ngón tay hoặc chuột để tô đồ theo đường nét đứt nhé!");
+        }
+
+        function selectTraceShape(shape) {
+            currentTraceShape = shape;
+            clearTracingCanvas();
+        }
+
+        function setTraceColor(color) {
+            currentTraceColor = color;
+            playSFX('pop');
+        }
+
+        function clearTracingCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw dashed outline for guide
+            ctx.save();
+            ctx.strokeStyle = '#94A3B8';
+            ctx.lineWidth = 6;
+            ctx.setLineDash([12, 10]);
+            ctx.beginPath();
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            if (currentTraceShape === 'circle') {
+                ctx.arc(cx, cy, 90, 0, Math.PI * 2);
+            } else if (currentTraceShape === 'square') {
+                ctx.strokeRect(cx - 80, cy - 80, 160, 160);
+            } else if (currentTraceShape === 'triangle') {
+                ctx.moveTo(cx, cy - 90);
+                ctx.lineTo(cx + 95, cy + 80);
+                ctx.lineTo(cx - 95, cy + 80);
+                ctx.closePath();
+            } else if (currentTraceShape === 'rectangle') {
+                ctx.strokeRect(cx - 120, cy - 70, 240, 140);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function getCanvasCoords(e) {
+            const rect = e.rect || canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCanvasCoords(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            ctx.strokeStyle = currentTraceColor;
+            ctx.lineWidth = 14;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCanvasCoords(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.closePath();
+            }
+        }
+
+        function finishTracing() {
+            playSFX('correct');
+            confetti({ particleCount: 50 });
+            speakText("Bé tô đồ đẹp quá! Hoan hô bé!", () => {
+                checkOverallProgress(6);
+            });
+        }
+
+        /* ================= REWARD & FINAL MODAL ================= */
+        function showRewardModal() {
+            document.getElementById('finalStarCount').innerText = stars;
+            document.getElementById('rewardModal').classList.remove('hidden');
+            confetti({ particleCount: 120, spread: 100, origin: { y: 0.4 } });
+            speakText("Chúc mừng các con! Các con đã hoàn thành xuất sắc lớp học hình học vui nhộn. Cô tặng các con thật nhiều ngôi sao nhé!");
+        }
+
+        function restartAllGames() {
+            stars = 0;
+            completedGames.clear();
+            document.getElementById('starCount').innerText = '0';
+            document.getElementById('rewardModal').classList.add('hidden');
+            startGamesMenu();
+        }
+
+        /* ----------------------------------------------------
+           HELPERS
+        ---------------------------------------------------- */
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Initialize voices on window load
+        window.onload = function() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = function() {
+                    window.speechSynthesis.getVoices();
+                };
+            }
+        };
+    </script>
+</body>
+</html>
